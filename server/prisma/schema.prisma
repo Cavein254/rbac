@@ -8,14 +8,13 @@ datasource db {
 }
 
 model User {
-  id          Int       @id @default(autoincrement())
+  id          String       @id @default(uuid())
   firstName   String    @db.VarChar(45)
   lastName    String    @db.VarChar(45)
   email       String    @db.VarChar(100)
   image       String?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
-  profile     Profile?  @relation(fields: [profileId], references: [id])
   profileId   Int?
   roles       UserRole[]
   posts       Post[]
@@ -32,7 +31,7 @@ model Post {
   like        Boolean
   views       Int?
   user        User      @relation(fields: [userId], references: [id])
-  userId      Int
+  userId      String
   comments    Comment[]
 }
 
@@ -43,19 +42,8 @@ model Comment {
   updatedAt   DateTime  @updatedAt
   post        Post      @relation(fields: [postId], references: [id])
   postId      Int
-}
-
-model Profile {
-  id                Int       @id @default(autoincrement())
-  username          String    @db.VarChar(45)
-  userId            Int       @unique
-  level             UserType    @default(USER)
-  numberOfPosts     Int?
-  numberOfComments  Int?
-  favoritePosts     Int?
-  dislikedPosts     Int?
-  points            Int?
-  user              User      @relation(fields: [userId], references: [id])
+  user        User      @relation(fields: [userId], references: [id])
+  userId      String
 }
 
 model Role {
@@ -76,7 +64,7 @@ model Permission {
 model UserRole {
   id      Int  @id @default(autoincrement())
   roleId  Int
-  userId  Int
+  userId  String
   role    Role @relation(fields: [roleId], references: [id])
   user    User @relation(fields: [userId], references: [id])
 

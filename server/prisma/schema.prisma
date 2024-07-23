@@ -1,0 +1,101 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          Int       @id @default(autoincrement())
+  firstName   String    @db.VarChar(45)
+  lastName    String    @db.VarChar(45)
+  email       String    @db.VarChar(100)
+  image       String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  profile     Profile?  @relation(fields: [profileId], references: [id])
+  profileId   Int?
+  roles       UserRole[]
+  posts       Post[]
+  comments    Comment[]
+}
+
+model Post {
+  id          Int       @id @default(autoincrement())
+  title       String    @db.VarChar(250)
+  body        String
+  slug        String    @db.VarChar(250)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  like        Boolean
+  views       Int?
+  user        User      @relation(fields: [userId], references: [id])
+  userId      Int
+  comments    Comment[]
+}
+
+model Comment {
+  id          Int       @id @default(autoincrement())
+  body        String    @db.TinyText
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  post        Post      @relation(fields: [postId], references: [id])
+  postId      Int
+}
+
+model Profile {
+  id                Int       @id @default(autoincrement())
+  username          String    @db.VarChar(45)
+  userId            Int       @unique
+  level             UserType    @default(USER)
+  numberOfPosts     Int?
+  numberOfComments  Int?
+  favoritePosts     Int?
+  dislikedPosts     Int?
+  points            Int?
+  user              User      @relation(fields: [userId], references: [id])
+}
+
+model Role {
+  id          Int          @id @default(autoincrement())
+  name        String       @db.TinyText
+  description String?
+  users       UserRole[]
+  permissions RolePermission[]
+}
+
+model Permission {
+  id          Int          @id @default(autoincrement())
+  name        String       @db.VarChar(45)
+  description String?
+  roles       RolePermission[]
+}
+
+model UserRole {
+  id      Int  @id @default(autoincrement())
+  roleId  Int
+  userId  Int
+  role    Role @relation(fields: [roleId], references: [id])
+  user    User @relation(fields: [userId], references: [id])
+
+  @@unique([roleId, userId])
+}
+
+model RolePermission {
+  id          Int        @id @default(autoincrement())
+  roleId      Int
+  permissionId Int
+  role        Role @relation(fields: [roleId], references: [id])
+  permission  Permission @relation(fields: [permissionId], references: [id])
+
+  @@unique([roleId, permissionId])
+}
+
+
+enum UserType {
+  ADMIN
+  MODERATOR
+  USER
+}

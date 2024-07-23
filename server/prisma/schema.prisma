@@ -36,7 +36,7 @@ model Profile {
 
 model Role {
   id          Int            @id @default(autoincrement())
-  name        String         @db.TinyText
+  name        String         @unique
   description String?
   users       UserRole[]
   permissions RolePermission[]

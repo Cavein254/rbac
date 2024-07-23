@@ -15,14 +15,14 @@ model User {
   image      String?
   created_at DateTime @db.DateTime
   update_at  DateTime @db.DateTime
-  profile_id Int?     @unique
+  profile_id String?     @unique
   profile    Profile? 
   roles      UserRole[]
   posts      Post[]
 }
 
 model Profile {
-  id               Int     @id @default(autoincrement())
+  id               String     @id @default(uuid())
   username         String  @db.VarChar(45)
   user_id          String     @unique
   level            UserLevel @default(BEGINNER)

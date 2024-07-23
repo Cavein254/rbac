@@ -8,17 +8,61 @@ datasource db {
 }
 
 model User {
-  id          String       @id @default(uuid())
-  firstName   String    @db.VarChar(45)
-  lastName    String    @db.VarChar(45)
-  email       String    @db.VarChar(100)
-  image       String?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  profileId   Int?
-  roles       UserRole[]
-  posts       Post[]
-  comments    Comment[]
+  id         String      @id @default(cuid())
+  first_name String   @db.VarChar(45)
+  last_name  String   @db.VarChar(45)
+  email      String   @db.VarChar(100)
+  image      String?
+  created_at DateTime @db.DateTime
+  update_at  DateTime @db.DateTime
+  profile_id Int?     @unique
+  profile    Profile? 
+  roles      UserRole[]
+  posts      Post[]
+}
+
+model Profile {
+  id               Int     @id @default(autoincrement())
+  username         String  @db.VarChar(45)
+  user_id          String     @unique
+  level            UserLevel @default(BEGINNER)
+  numberOfPosts    Int?
+  numberOfComments Int?
+  favoritePosts    Int?
+  dislikedPosts    Int?
+  points           Int?
+  user             User    @relation(fields: [user_id], references: [id])
+}
+
+model Role {
+  id          Int            @id @default(autoincrement())
+  name        String         @db.TinyText
+  description String?
+  users       UserRole[]
+  permissions RolePermission[]
+}
+
+model Permission {
+  id          Int              @id @default(autoincrement())
+  name        String           @db.VarChar(45)
+  description String?
+  roles       RolePermission[]
+}
+
+model UserRole {
+  id     Int @id @default(autoincrement())
+  role_id Int
+  user_id String
+  role    Role @relation(fields: [role_id], references: [id])
+  user    User @relation(fields: [user_id], references: [id])
+}
+
+model RolePermission {
+  id            Int         @id @default(autoincrement())
+  role_id       Int
+  permission_id Int
+  role          Role        @relation(fields: [role_id], references: [id])
+  permission    Permission  @relation(fields: [permission_id], references: [id])
 }
 
 model Post {
@@ -26,64 +70,29 @@ model Post {
   title       String    @db.VarChar(250)
   body        String
   slug        String    @db.VarChar(250)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  created_at  DateTime  @db.DateTime
+  updated_at  DateTime  @db.DateTime
   like        Boolean
   views       Int?
-  user        User      @relation(fields: [userId], references: [id])
-  userId      String
+  user_id     String
+  user        User      @relation(fields: [user_id], references: [id])
   comments    Comment[]
 }
 
 model Comment {
-  id          Int       @id @default(autoincrement())
-  body        String    @db.TinyText
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  post        Post      @relation(fields: [postId], references: [id])
-  postId      Int
-  user        User      @relation(fields: [userId], references: [id])
-  userId      String
-}
-
-model Role {
-  id          Int          @id @default(autoincrement())
-  name        String       @db.TinyText
-  description String?
-  users       UserRole[]
-  permissions RolePermission[]
-}
-
-model Permission {
-  id          Int          @id @default(autoincrement())
-  name        String       @db.VarChar(45)
-  description String?
-  roles       RolePermission[]
-}
-
-model UserRole {
-  id      Int  @id @default(autoincrement())
-  roleId  Int
-  userId  String
-  role    Role @relation(fields: [roleId], references: [id])
-  user    User @relation(fields: [userId], references: [id])
-
-  @@unique([roleId, userId])
-}
-
-model RolePermission {
-  id          Int        @id @default(autoincrement())
-  roleId      Int
-  permissionId Int
-  role        Role @relation(fields: [roleId], references: [id])
-  permission  Permission @relation(fields: [permissionId], references: [id])
-
-  @@unique([roleId, permissionId])
+  id         Int      @id @default(autoincrement())
+  body       String   @db.TinyText
+  created_at DateTime @db.DateTime
+  updated_at DateTime @db.DateTime
+  post_id    Int
+  post       Post     @relation(fields: [post_id], references: [id])
 }
 
 
-enum UserType {
-  ADMIN
-  MODERATOR
-  USER
+enum UserLevel {
+  BEGINNER
+  PROFESSIONAL
+  ADVANCED
+  EXPERT
+  MASTER
 }

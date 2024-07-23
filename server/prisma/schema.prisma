@@ -44,7 +44,7 @@ model Role {
 
 model Permission {
   id          Int              @id @default(autoincrement())
-  name        String           @db.VarChar(45)
+  name        String           @unique
   description String?
   roles       RolePermission[]
 }
